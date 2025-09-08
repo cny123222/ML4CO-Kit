@@ -30,7 +30,7 @@ class OPGurobiSolver(OPSolver):
     def __init__(
         self, 
         scale: int = 1e6, 
-        time_limit: float = 60.0, 
+        time_limit: float = 120.0, 
         gurobi_gap: float = 0.0,
         precision: Union[np.float32, np.float64] = np.float32
     ):

@@ -61,6 +61,7 @@ from .mvc.or_tools import MVCORSolver
 #######################################
 from .op.base import OPSolver
 from .op.gurobi import OPGurobiSolver
+from .op.compass import OPCompassSolver
 
 #######################################
 #             TSP Solver             #  
