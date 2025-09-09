@@ -22,15 +22,15 @@ from subprocess import check_call, check_output
 from ml4co_kit.solver.op.base import OPSolver
 from ml4co_kit.utils.type_utils import SOLVER_TYPE
 from ml4co_kit.utils.time_utils import iterative_execution, Timer
-import torch
 
+call_cnt = 0
 
 class OPCompassSolver(OPSolver):
     def __init__(
         self, 
         scale: int = 1e7, 
         executable: str = None,
-        precision: Union[np.float32, np.float64] = np.float32
+        precision: Union[np.float32, np.float64] = np.float64
     ):
         super(OPCompassSolver, self).__init__(
             solver_type=SOLVER_TYPE.COMPASS, scale=scale, precision=precision
@@ -52,30 +52,65 @@ class OPCompassSolver(OPSolver):
     ) -> Tuple[float, List[int]]:
         """
         Solve a single OP instance using Compass
-        """
-        with tempfile.TemporaryDirectory() as tempdir:
-            problem_filename = os.path.join(tempdir, f"{name}.oplib")
-            tour_filename = os.path.join(tempdir, f"{name}.tour")
-            log_filename = os.path.join(tempdir, f"{name}.log")
+        """   
+        
+        # with tempfile.TemporaryDirectory() as tempdir:
+        #     problem_filename = os.path.join(tempdir, f"{name}.oplib")
+        #     tour_filename = os.path.join(tempdir, f"{name}.tour")
+        #     log_filename = os.path.join(tempdir, f"{name}.log")
 
-            try:
-                self._write_oplib(problem_filename, depot, points, prizes, max_length)
+        #     try:
+        #         self._write_oplib(problem_filename, depot, points, prizes, max_length)
 
-                with open(log_filename, 'w') as f:
-                    check_call([self.executable, '--op', '--op-ea4op', problem_filename, '-o', tour_filename],
-                            stdout=f, stderr=f)
+        #         with open(log_filename, 'w') as f:
+        #             check_call([self.executable, '--op', '--op-ea4op', problem_filename, '-o', tour_filename],
+        #                     stdout=f, stderr=f)
 
-                tour = self._read_oplib(tour_filename, n=len(prizes))
-                tour_length = self._calc_op_length(depot, points, tour)
-                if not tour_length <= max_length:
-                    print("Warning: length exceeds max length:", tour_length, max_length)
-                assert tour_length <= max_length + 1e-5, "Tour exceeds max_length!"
-                return tour
+        #         tour = self._read_oplib(tour_filename, n=len(prizes))
+        #         tour_length = self._calc_op_length(depot, points, tour)
+        #         if not tour_length <= max_length:
+        #             print("Warning: length exceeds max length:", tour_length, max_length)
+        #         assert tour_length <= max_length + 1e-5, "Tour exceeds max_length!"
+        #         return tour
 
-            except Exception as e:
-                print("Exception occured")
-                print(e)
-                return None
+        #     except Exception as e:
+        #         print("Exception occured")
+        #         print(e)
+        #         return None
+        
+        global call_cnt
+        
+        debug_dir = os.path.join(os.getcwd(), "debug")
+        os.makedirs(debug_dir, exist_ok=True)
+    
+        problem_filename = os.path.join(debug_dir, f"{call_cnt}.oplib")
+        tour_filename = os.path.join(debug_dir, f"{call_cnt}.tour")
+        log_filename = os.path.join(debug_dir, f"{call_cnt}.log")
+        
+        call_cnt += 1
+        
+        depot = depot.tolist()
+        points = points.tolist()
+        prizes = prizes.tolist()
+
+        try:
+            self._write_oplib(problem_filename, depot, points, prizes, max_length)
+
+            with open(log_filename, 'w') as f:
+                check_call([self.executable, '--op', '--op-ea4op', problem_filename, '-o', tour_filename],
+                        stdout=f, stderr=f)
+
+            tour = self._read_oplib(tour_filename, n=len(prizes))
+            tour_length = self._calc_op_length(depot, points, tour)
+            if not tour_length <= max_length:
+                print("Warning: length exceeds max length:", tour_length, max_length)
+            assert tour_length <= max_length + 1e-5, "Tour exceeds max_length!"
+            return tour
+
+        except Exception as e:
+            print("Exception occured")
+            print(e)
+            return None
 
     def solve(
         self, 
@@ -137,6 +172,10 @@ class OPCompassSolver(OPSolver):
         return self.tours
     
     def _write_oplib(self, filename, depot, loc, prize, max_length, name="problem"):
+        
+        # print("[DEBUG] In _write_oplib")
+        # print(filename, depot, loc, prize, max_length)
+        
         with open(filename, 'w') as f:
             f.write("\n".join([
                 "{} : {}".format(k, v)
@@ -206,7 +245,6 @@ class OPCompassSolver(OPSolver):
                     f.write("{} = {}\n".format(k, v))
     
     def _calc_op_length(self, depot, loc, tour):
-        print("here2", tour)
         assert len(np.unique(tour)) == len(tour), "Tour cannot contain duplicates"
         loc_with_depot = np.vstack((np.array(depot)[None, :], np.array(loc)))
         sorted_locs = loc_with_depot[np.concatenate(([0], tour, [0]))]

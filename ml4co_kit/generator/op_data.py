@@ -20,7 +20,7 @@ class OPDataGenerator(EdgeGeneratorBase):
         test_samples_num: int = 1280,
         save_path: pathlib.Path = "data/op",
         filename: str = None,
-        precision: Union[np.float32, np.float64] = np.float32,
+        precision: Union[np.float32, np.float64] = np.float64,
     ):
         # filename
         if filename is None:

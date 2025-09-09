@@ -59,7 +59,7 @@ class OPSolver(SolverBase):
         self, 
         solver_type: SOLVER_TYPE = None, 
         scale: int = 1e6,
-        precision: Union[np.float32, np.float64] = np.float32
+        precision: Union[np.float32, np.float64] = np.float64
     ):
         super(OPSolver, self).__init__(
             task_type=TASK_TYPE.OP, solver_type=solver_type, precision=precision
@@ -499,7 +499,7 @@ class OPSolver(SolverBase):
             
         # check the data format
         if isinstance(data, list) and len(data) > 0:
-            if isinstance(data[0], tuple) and len(data[0]) == 4:
+            if isinstance(data[0], tuple) and len(data[0]) == 5:
                 depots, points, prizes, max_lengths, tours = zip(*data)
                 depots = np.array(depots)
                 points = np.array(points)
@@ -508,6 +508,16 @@ class OPSolver(SolverBase):
                 self.from_data(
                     depots=depots, points=points, prizes=prizes, max_lengths=max_lengths,
                     tours=tours, ref=ref, norm=norm, normalize=normalize
+                )
+            elif isinstance(data[0], tuple) and len(data[0]) == 4:
+                depots, points, prizes, max_lengths = zip(*data)
+                depots = np.array(depots)
+                points = np.array(points)
+                prizes = np.array(prizes)
+                max_lengths = np.array(max_lengths)
+                self.from_data(
+                    depots=depots, points=points, prizes=prizes, max_lengths=max_lengths,
+                    tours=None, ref=ref, norm=norm, normalize=normalize
                 )
             else:
                 raise ValueError("Invalid data format in PKL file")

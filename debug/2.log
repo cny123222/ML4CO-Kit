@@ -1,0 +1,13 @@
+Compass: Combinatorial Optimization Problem Solver, v0.1
+
+Parameter(s) specified in the command line:
+ --op --op-ea4op /mnt/nas-new/home/panwenzheng/chennuoyan/ML4CO-Kit/debug/2.oplib
+ -o /mnt/nas-new/home/panwenzheng/chennuoyan/ML4CO-Kit/debug/2.tour
+
+Reading problem data from '/mnt/nas-new/home/panwenzheng/chennuoyan/ML4CO-Kit/debug/2.oplib'...
+
+  Problem Name: problem
+  Problem Type: OP
+  Number of Nodes: 21
+  Cost limit: 20000000.00
+  Rounded Euclidean Norm (CC_EUCLIDEAN)
