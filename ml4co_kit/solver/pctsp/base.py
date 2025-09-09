@@ -534,7 +534,7 @@ class PCTSPSolver(SolverBase):
             
         # check the data format
         if isinstance(data, list) and len(data) > 0:
-            try:
+            if len(data[0]) == 5:
                 depots, points, penalties, norm_prizes, tours = zip(*data)
                 depots = np.array(depots)
                 points = np.array(points)
@@ -545,8 +545,19 @@ class PCTSPSolver(SolverBase):
                     norm_prizes=norm_prizes, tours=tours, ref=ref, 
                     norm=norm, normalize=normalize
                 )
-            except Exception as e:
-                raise ValueError(f"Invalid data format in PKL file: {e}")
+            elif len(data[0]) == 4:
+                depots, points, penalties, norm_prizes = zip(*data)
+                depots = np.array(depots)
+                points = np.array(points)
+                penalties = np.array(penalties)
+                norm_prizes = np.array(norm_prizes)
+                self.from_data(
+                    depots=depots, points=points, penalties=penalties, 
+                    norm_prizes=norm_prizes, tours=None, ref=ref, 
+                    norm=norm, normalize=normalize
+                )
+            else:
+                raise ValueError(f"Invalid data format in PKL file")
         else:
             raise ValueError("PKL file should contain a list of tuples")
 

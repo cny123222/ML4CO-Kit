@@ -42,7 +42,7 @@ class PCTSPORSolver(PCTSPSolver):
         scale: int = 1e6, 
         strategy: str = "guided", 
         time_limit: int = 1,
-        precision: Union[np.float32, np.float64] = np.float32
+        precision: Union[np.float32, np.float64] = np.float64
     ):
         super(PCTSPORSolver, self).__init__(
             solver_type=SOLVER_TYPE.ORTOOLS, scale=scale, precision=precision

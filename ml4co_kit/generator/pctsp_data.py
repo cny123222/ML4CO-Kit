@@ -19,11 +19,12 @@ class PCTSPDataGenerator(EdgeGeneratorBase):
         test_samples_num: int = 1280,
         save_path: pathlib.Path = "data/pctsp",
         filename: str = None,
-        precision: Union[np.float32, np.float64] = np.float32,
+        precision: Union[np.float32, np.float64] = np.float64,
         # special args for uniform
         uniform_k: float = 3.0,
         uniform_prize_factor: float = 4.0, 
         uniform_penalty_factor: float = 3.0,
+        seed: int = 1234,
     ):
         # filename
         if filename is None:
@@ -65,6 +66,8 @@ class PCTSPDataGenerator(EdgeGeneratorBase):
             check_solver_dict=check_solver_dict
         )
         self.solver: PCTSPSolver
+        
+        np.random.seed(seed)
 
     ##################################
     #         Generate Funcs         #
