@@ -943,7 +943,7 @@ def test_tsp():
 ##############################################
 
 if __name__ == "__main__":
-    test_atsp()
+    # test_atsp()
     # test_cvrp()
     # test_kp()
     # test_lp()
@@ -952,6 +952,6 @@ if __name__ == "__main__":
     # test_mis()
     # test_mvc()
     # test_op()
-    # test_pctsp()
+    test_pctsp()
     # test_spctsp()
     # test_tsp()
