@@ -88,4 +88,5 @@ class OPEvaluator(object):
         self.prizes = prizes     
     
     def evaluate(self, route: Union[np.ndarray, list]):
+        print("here", route)
         return self.prizes[to_numpy(route)[1:-1] - 1].sum()

@@ -62,7 +62,7 @@ from .solver import MCutSolver, MCutGurobiSolver, MCutORSolver
 from .solver import MISSolver, KaMISSolver, MISGurobiSolver, MISORSolver
 from .solver import MVCSolver, MVCGurobiSolver, MVCORSolver
 from .solver import KPSolver, KPORSolver
-from .solver import OPSolver, OPGurobiSolver
+from .solver import OPSolver, OPGurobiSolver, OPCompassSolver
 from .solver import PCTSPSolver, PCTSPORSolver, PCTSPILSSolver
 from .solver import SPCTSPSolver, SPCTSPReoptSolver
 from .solver import (

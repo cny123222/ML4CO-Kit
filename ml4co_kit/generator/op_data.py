@@ -3,7 +3,7 @@ import numpy as np
 from typing import Union, Sequence, Iterable
 from ml4co_kit.utils.type_utils import SOLVER_TYPE
 from ml4co_kit.generator.base import EdgeGeneratorBase
-from ml4co_kit.solver import OPSolver, OPGurobiSolver
+from ml4co_kit.solver import OPSolver, OPGurobiSolver, OPCompassSolver
 
 
 class OPDataGenerator(EdgeGeneratorBase):
@@ -33,9 +33,11 @@ class OPDataGenerator(EdgeGeneratorBase):
         }
         supported_solver_dict = {
             SOLVER_TYPE.GUROBI: OPGurobiSolver,
+            SOLVER_TYPE.COMPASS: OPCompassSolver
         }
         check_solver_dict = {
             SOLVER_TYPE.GUROBI: self._check_free,
+            SOLVER_TYPE.COMPASS: self._check_free
         }
 
         # super args
@@ -134,7 +136,7 @@ class OPDataGenerator(EdgeGeneratorBase):
                     f.write(f"{cur_prizes[i]} ")
                 f.write("max_length ")
                 f.write(f"{cur_max_length} ")
-                f.write("tours ")
+                f.write("output ")
                 for node_idx in tour:
                     f.write(f"{node_idx} ")
                 f.write("\n")

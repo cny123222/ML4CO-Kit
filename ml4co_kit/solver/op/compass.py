@@ -18,22 +18,24 @@ import shutil
 import numpy as np
 from multiprocessing import Pool
 from typing import Union, Tuple, List
-from subprocess import check_output
+from subprocess import check_call, check_output
 from ml4co_kit.solver.op.base import OPSolver
 from ml4co_kit.utils.type_utils import SOLVER_TYPE
 from ml4co_kit.utils.time_utils import iterative_execution, Timer
+import torch
 
 
 class OPCompassSolver(OPSolver):
     def __init__(
         self, 
         scale: int = 1e7, 
+        executable: str = None,
         precision: Union[np.float32, np.float64] = np.float32
     ):
         super(OPCompassSolver, self).__init__(
             solver_type=SOLVER_TYPE.COMPASS, scale=scale, precision=precision
         )
-        self.executable = shutil.which("compass")
+        self.executable = executable if executable is not None else shutil.which("compass")
         assert self.executable is not None, (
             "Could not find the 'compass' executable in the system's PATH.\n"
             "Please ensure that Compass is installed correctly and that the directory "
@@ -45,43 +47,35 @@ class OPCompassSolver(OPSolver):
         depot: np.ndarray, 
         points: np.ndarray, 
         prizes: np.ndarray, 
-        max_length: float
+        max_length: float,
+        name: str = "problem"
     ) -> Tuple[float, List[int]]:
         """
         Solve a single OP instance using Compass
         """
         with tempfile.TemporaryDirectory() as tempdir:
-            problem_filename = os.path.join(tempdir, "problem.oplib")
-            tour_filename = os.path.join(tempdir, "solution.tour")
-            log_filename = os.path.join(tempdir, "compass.log")
-            
-            self._write_oplib(problem_filename, depot, points, prizes, max_length)
-            
+            problem_filename = os.path.join(tempdir, f"{name}.oplib")
+            tour_filename = os.path.join(tempdir, f"{name}.tour")
+            log_filename = os.path.join(tempdir, f"{name}.log")
+
             try:
-                # Prepare the command
-                cmd = [
-                    self.executable,
-                    '--op',
-                    '--op-ea4op',
-                    problem_filename,
-                    '-o',
-                    tour_filename
-                ]
-                # Solve the problem
+                self._write_oplib(problem_filename, depot, points, prizes, max_length)
+
                 with open(log_filename, 'w') as f:
-                    check_output(cmd, stderr=f, stdout=f)
-                # Read the solution
-                tour = self._read_oplib(tour_filename)
+                    check_call([self.executable, '--op', '--op-ea4op', problem_filename, '-o', tour_filename],
+                            stdout=f, stderr=f)
+
+                tour = self._read_oplib(tour_filename, n=len(prizes))
                 tour_length = self._calc_op_length(depot, points, tour)
-                if not tour_length <= max_length + 1e-5:
-                    print(f"Warning: Tour length {tour_length} exceeds max_length {max_length}")
+                if not tour_length <= max_length:
+                    print("Warning: length exceeds max length:", tour_length, max_length)
+                assert tour_length <= max_length + 1e-5, "Tour exceeds max_length!"
                 return tour
-                
+
             except Exception as e:
-                print(f"An exception occurred while solving an OP instance with Compass: {e}")
-                with open(log_filename, 'r') as f:
-                    print("Compass log:\n", f.read())
-                return []
+                print("Exception occured")
+                print(e)
+                return None
 
     def solve(
         self, 
@@ -196,11 +190,27 @@ class OPCompassSolver(OPSolver):
         assert tour[-1] != 0  # Tour should not end with depot
         return tour[1:].tolist()
     
+    def _write_compass_par(self, filename, parameters):
+        default_parameters = {  # Use none to include as flag instead of kv
+            "SPECIAL": None,
+            "MAX_TRIALS": 10000,
+            "RUNS": 10,
+            "TRACE_LEVEL": 1,
+            "SEED": 0
+        }
+        with open(filename, 'w') as f:
+            for k, v in {**default_parameters, **parameters}.items():
+                if v is None:
+                    f.write("{}\n".format(k))
+                else:
+                    f.write("{} = {}\n".format(k, v))
+    
     def _calc_op_length(self, depot, loc, tour):
+        print("here2", tour)
         assert len(np.unique(tour)) == len(tour), "Tour cannot contain duplicates"
         loc_with_depot = np.vstack((np.array(depot)[None, :], np.array(loc)))
         sorted_locs = loc_with_depot[np.concatenate(([0], tour, [0]))]
         return np.linalg.norm(sorted_locs[1:] - sorted_locs[:-1], axis=-1).sum()
             
     def __str__(self) -> str:
-        return "OPGurobiSolver"
+        return "OPCompassSolver"
