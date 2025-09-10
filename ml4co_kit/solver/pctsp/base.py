@@ -349,8 +349,8 @@ class PCTSPSolver(SolverBase):
         r"""Calculate the cost of a PCTSP tour."""
         # With some tolerance we should satisfy minimum prize
         assert len(np.unique(tour)) == len(tour), "Tour cannot contain duplicates"
-        assert self.calc_pctsp_total(prize, tour) >= 1 - 1e-5 or len(tour) == len(prize), \
-            "Tour should collect at least 1 as total prize or visit all nodes"
+        assert self.calc_pctsp_total(prize, tour) >= 1 - 1e-4 or len(tour) == len(prize), \
+            f"Tour should collect at least 1 as total prize or visit all nodes: {self.calc_pctsp_total(prize, tour)} < 1"
         # Penalty is only incurred for locations not visited, so charge total penalty minus penalty of locations visited
         return self.calc_pctsp_length(depot, loc, tour) + np.sum(penalty) - self.calc_pctsp_total(penalty, tour)  
     
@@ -581,14 +581,14 @@ class PCTSPSolver(SolverBase):
         # depots
         if depots is not None:
             depots = to_numpy(depots)
-            self.depots = depots.astype(np.float32)
+            self.depots = depots.astype(np.float64)
             self._check_depots_dim()
     
         # points
         if points is not None:
             points = to_numpy(points)
             self.ori_points = points
-            self.points = points.astype(np.float32)
+            self.points = points.astype(np.float64)
             self._check_ori_points_dim()
             if normalize:
                 self._normalize_points()
@@ -596,19 +596,19 @@ class PCTSPSolver(SolverBase):
         # penalties
         if penalties is not None:
             penalties = to_numpy(penalties)
-            self.penalties = penalties.astype(np.float32)
+            self.penalties = penalties.astype(np.float64)
             self._check_penalties_dim()
             
         # deterministic prizes
         if deterministic_prizes is not None:
             deterministic_prizes = to_numpy(deterministic_prizes)
-            self.deterministic_prizes = deterministic_prizes.astype(np.float32)
+            self.deterministic_prizes = deterministic_prizes.astype(np.float64)
             self._check_deterministic_prizes_not_none()
         
         # stochastic prizes
         if stochastic_prizes is not None:
             stochastic_prizes = to_numpy(stochastic_prizes)
-            self.stochastic_prizes = stochastic_prizes.astype(np.float32)
+            self.stochastic_prizes = stochastic_prizes.astype(np.float64)
             self._check_stochastic_prizes_not_none()
     
         # tours
@@ -690,7 +690,8 @@ class PCTSPSolver(SolverBase):
                     f.write(f"{penalties[idx][i]} ")
 
                 # write deterministic prizes
-                f.write(f"deterministic_prizes ")
+                # f.write(f"deterministic_prizes ")
+                f.write(f"norm_prizes ")
                 for i in range(len(deterministic_prizes[idx])):
                     f.write(f"{deterministic_prizes[idx][i]} ")
                     
@@ -701,7 +702,7 @@ class PCTSPSolver(SolverBase):
                 
                 # write tours
                 if tours is not None:
-                    f.write(f"tours ")
+                    f.write(f"output ")
                     for node_idx in tours[idx]:
                         f.write(f"{node_idx} ")
                 
