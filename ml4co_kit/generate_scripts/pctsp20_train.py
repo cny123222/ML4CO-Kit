@@ -5,7 +5,7 @@ from .. import PCTSPORSolver
 output_dir = "/mnt/nas-new/home/panwenzheng/chennuoyan/Dataset/Train/pctsp/"
 os.makedirs(output_dir, exist_ok=True)
 
-for seed in tqdm(range(16)):
+for seed in tqdm(range(1, 16)):
     print(f"[DEBUG] Processing seed {seed}")
     solver = PCTSPORSolver(time_limit=60)
     
